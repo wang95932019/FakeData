@@ -1,13 +1,13 @@
 from faker import Factory
 from faker import Faker
 import pymysql
- 
+
 # 产生Faker对象，并本地化
 fake = Faker("zh_CN")
 
-def generate_data(values:list, num:int=100) -> list:
 
-    """ 
+def generate_data(values: list, num: int = 100) -> list:
+    """
     生成假数据。
     values：需要生成的数据类型。['name','age']
     num：需要产生的数据条目
@@ -16,10 +16,10 @@ def generate_data(values:list, num:int=100) -> list:
 
     # 传出的参数与方法之间的对应关系
     method_dict = {
-        'id' : 'fake.md5(raw_output=False)[:10]',
-        'name' : 'fake.name()',
-        'age' : 'fake.random_int(1,99)',
-        'score' : 'fake.random_int(1,99)'
+        'id': 'fake.md5(raw_output=False)[:10]',
+        'name': 'fake.name()',
+        'age': 'fake.random_int(1,99)',
+        'score': 'fake.random_int(1,99)'
     }
 
     # 将结果保存为列表，其中存放这字典
@@ -31,15 +31,15 @@ def generate_data(values:list, num:int=100) -> list:
         data.append(result)
     return data
 
-def import_mysql(table:str, data:list):
 
+def import_mysql(table: str, data: list):
     # 数据库连接配置
     config = {
-        'host':'127.0.0.1', 
-        'port':3306,        # 注意：端口是int而不是str
-        'user':'root', 
-        'password':'wang9593', 
-        'db':'test'
+        'host': '127.0.0.1',
+        'port': 3306,  # 注意：端口是int而不是str
+        'user': 'root',
+        'password': 'wang9593',
+        'db': 'test'
     }
     with pymysql.connect(**config) as db:
         cursor = db.cursor()
@@ -51,11 +51,10 @@ def import_mysql(table:str, data:list):
             res_sql = sql % (cols, val_cols)
             cursor.execute(res_sql, result)  # 将字典result传入
 
-        db.commit()     # 统一提交
+        db.commit()  # 统一提交
+
 
 if __name__ == "__main__":
     values = ['name', 'score', 'id']
     data = generate_data(values)
     import_mysql("test_5", data)
-
-
