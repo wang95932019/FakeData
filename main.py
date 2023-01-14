@@ -1,12 +1,16 @@
-from faker import Factory
-from faker import Faker
 import pymysql
+import yaml
+from faker import Faker
+
+# 读取配置文件
+with open("config.yaml") as file:
+    config = yaml.safe_load(file)  # 字典，保存配置信息
 
 # 产生Faker对象，并本地化
 fake = Faker("zh_CN")
 
 
-def generate_data(values: list, num: int = 100) -> list:
+def generate_data(values: list, num: int = config['num']) -> list:
     """
     生成假数据。
     values：需要生成的数据类型。['name','age']
@@ -15,12 +19,7 @@ def generate_data(values: list, num: int = 100) -> list:
     """
 
     # 传出的参数与方法之间的对应关系
-    method_dict = {
-        'id': 'fake.md5(raw_output=False)[:10]',
-        'name': 'fake.name()',
-        'age': 'fake.random_int(1,99)',
-        'score': 'fake.random_int(1,99)'
-    }
+    method_dict = config["method_dict"]
 
     # 将结果保存为列表，其中存放这字典
     data = []
@@ -32,19 +31,13 @@ def generate_data(values: list, num: int = 100) -> list:
     return data
 
 
-def import_mysql(table: str, data: list):
+def import_mysql(data: list, table: str = config["mysql"]['table']):
     # 数据库连接配置
-    config = {
-        'host': '127.0.0.1',
-        'port': 3306,  # 注意：端口是int而不是str
-        'user': 'root',
-        'password': 'wang9593',
-        'db': 'test'
-    }
-    with pymysql.connect(**config) as db:
+    con_config = {k: v for k, v in config["mysql"].items() if k != 'table'}
+
+    with pymysql.connect(**con_config) as db:
         cursor = db.cursor()
-        for result in data:
-            # result是一个字典，写插入数据库的代码
+        for result in data:  # result是一个字典，写插入数据库的代码
             cols = ", ".join(f'`{k}`' for k in result.keys())
             val_cols = ', '.join(f'%({k})s' for k in result.keys())
             sql = f"insert into {table}(%s) values(%s)"
@@ -57,4 +50,6 @@ def import_mysql(table: str, data: list):
 if __name__ == "__main__":
     values = ['name', 'score', 'id']
     data = generate_data(values)
-    import_mysql("test_5", data)
+    import_mysql(data)
+
+    print(config)

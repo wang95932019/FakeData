@@ -1,0 +1,19 @@
+# mysql相关配置
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: wang9593
+  db: test
+  table: test_5
+
+# 可以的生成数据种类与对应的方法
+method_dict:
+  id: fake.md5(raw_output=False)[:10]
+  name: fake.name()
+  age: fake.random_int(1,99)
+  score: fake.random_int(1,99)
+
+# 生成的数据条目
+num: 100
+
